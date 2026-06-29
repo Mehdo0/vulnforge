@@ -32,3 +32,5 @@ docker/secrets/
 
 # Scan artifacts (don't commit client data)
 scan_artifacts/
+data/reports/
+data/*.db
