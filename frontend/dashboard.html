@@ -93,10 +93,14 @@ tr:hover { background: rgba(99,102,241,0.05); }
   <!-- Auth -->
   <div id="authSection">
     <div class="card auth-form" id="loginForm">
-      <h2>Login</h2>
+      <h2 id="authTitle">Register</h2>
       <input type="email" id="loginEmail" placeholder="Email" />
       <input type="password" id="loginPassword" placeholder="Password" />
-      <button class="btn btn-primary" onclick="login()" style="width:100%">Login</button>
+      <input type="text" id="registerCompany" placeholder="Company (optional)" style="display:block" />
+      <button class="btn btn-primary" onclick="handleAuth()" style="width:100%" id="authBtn">Register</button>
+      <p style="text-align:center;margin-top:12px;color:var(--muted);font-size:0.85rem">
+        <a href="#" onclick="toggleAuth()" style="color:var(--accent)" id="authToggle">Already have an account? Login</a>
+      </p>
     </div>
   </div>
 
@@ -137,6 +141,15 @@ tr:hover { background: rgba(99,102,241,0.05); }
 <script>
 const API = 'http://localhost:8000/api';
 let token = localStorage.getItem('vf_token');
+let isLogin = false;
+
+function toggleAuth() {
+  isLogin = !isLogin;
+  document.getElementById('authTitle').textContent = isLogin ? 'Login' : 'Register';
+  document.getElementById('authBtn').textContent = isLogin ? 'Login' : 'Register';
+  document.getElementById('registerCompany').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('authToggle').textContent = isLogin ? "Don't have an account? Register" : 'Already have an account? Login';
+}
 
 async function api(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json', ...opts.headers };
@@ -154,15 +167,25 @@ function showTab(tab) {
   document.getElementById('scanDetailSection').classList.add('hidden');
 }
 
-async function login() {
+async function handleAuth() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
+  const company = document.getElementById('registerCompany').value;
   try {
-    const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
-    token = data.access_token;
+    if (isLogin) {
+      const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+      token = data.access_token;
+    } else {
+      await api('/auth/register', { method: 'POST', body: JSON.stringify({ email, password, company: company || null }) });
+      const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+      token = data.access_token;
+    }
     localStorage.setItem('vf_token', token);
     showDashboard();
-  } catch(e) { alert('Login failed'); }
+  } catch(e) { 
+    const msg = isLogin ? 'Login failed' : 'Registration failed';
+    alert(msg + ' — check your inputs');
+  }
 }
 
 function logout() {
