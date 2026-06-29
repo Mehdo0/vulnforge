@@ -62,7 +62,7 @@ class Finding:
             "cwe_id": self.cwe_id,
             "cvss_score": self.cvss_score,
             "cvss_vector": self.cvss_vector,
-            "agent": self.agent,
+            "agent_type": self.agent,
             "timestamp": self.timestamp,
         }
 

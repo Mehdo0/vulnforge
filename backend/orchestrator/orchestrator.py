@@ -93,7 +93,7 @@ async def run_audit(scan_id: str):
                     cvss_score=finding.get("cvss_score"),
                     category=finding.get("category", "general"),
                     evidence=finding.get("evidence"),
-                    remediation=finding.get("remediation"),
+                    remediation=finding.get("remediation") or finding.get("recommendation"),
                     cwe_id=finding.get("cwe_id"),
                     endpoint=finding.get("endpoint"),
                 )

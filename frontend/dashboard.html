@@ -3,138 +3,229 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VulnForge — Dashboard</title>
+<title>VulnForge — AI Security Audit</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;800&display=swap');
+
 :root {
-  --bg: #0a0a0f;
-  --surface: #14141f;
-  --border: #1e1e2e;
-  --text: #e0e0f0;
-  --muted: #6c6c8a;
-  --accent: #6366f1;
-  --danger: #ef4444;
-  --high: #f97316;
-  --medium: #eab308;
-  --low: #22c55e;
-  --info: #3b82f6;
-  --radius: 8px;
+  --bg: #06060c;
+  --bg2: #0c0c18;
+  --surface: #111122;
+  --surface2: #18182c;
+  --border: #1e1e3a;
+  --text: #e8e8f8;
+  --muted: #6c6c9a;
+  --accent: #6c5ce7;
+  --accent2: #a855f7;
+  --danger: #ff4444;
+  --critical: #ff2222;
+  --high: #ff6b35;
+  --medium: #ffd700;
+  --low: #00e676;
+  --info: #448aff;
+  --success: #00c853;
+  --gradient: linear-gradient(135deg, var(--accent), var(--accent2));
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { 
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Inter', -apple-system, sans-serif;
   background: var(--bg); color: var(--text); min-height: 100vh;
+  background-image: 
+    radial-gradient(ellipse at 20% 50%, rgba(108,92,231,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.05) 0%, transparent 50%);
 }
 .header {
   background: var(--surface); border-bottom: 1px solid var(--border);
   padding: 16px 32px; display: flex; justify-content: space-between; align-items: center;
+  backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100;
 }
-.header h1 { font-size: 1.5rem; background: linear-gradient(135deg, var(--accent), #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.header .user { display: flex; align-items: center; gap: 12px; }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon { 
+  width: 36px; height: 36px; background: var(--gradient); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+}
+.logo-text { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; }
+.header .user { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
 .btn {
-  padding: 8px 16px; border: none; border-radius: var(--radius); cursor: pointer;
-  font-weight: 600; font-size: 0.875rem; transition: all 0.2s;
+  padding: 10px 20px; border: none; border-radius: var(--radius-sm); cursor: pointer;
+  font-weight: 600; font-size: 0.875rem; transition: all 0.2s; font-family: inherit;
 }
-.btn-primary { background: var(--accent); color: white; }
-.btn-primary:hover { background: #5558e6; }
-.btn-danger { background: var(--danger); color: white; }
-.container { max-width: 1100px; margin: 0 auto; padding: 32px; }
+.btn-primary { background: var(--gradient); color: white; box-shadow: 0 2px 12px rgba(108,92,231,0.3); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(108,92,231,0.4); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+.btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+.btn-danger:hover { background: var(--danger); color: white; }
+.container { max-width: 1160px; margin: 0 auto; padding: 32px 24px; }
 .card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 24px; margin-bottom: 16px;
+  border-radius: var(--radius); padding: 24px; margin-bottom: 20px;
+  box-shadow: var(--shadow); transition: border-color 0.2s;
 }
-.card h2 { font-size: 1.1rem; margin-bottom: 16px; }
-.input-group { display: flex; gap: 8px; margin-bottom: 16px; }
+.card:hover { border-color: rgba(108,92,231,0.3); }
+.card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.input-group { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 input, select {
-  padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius);
-  background: var(--bg); color: var(--text); font-size: 0.9rem; flex: 1;
+  padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg2); color: var(--text); font-size: 0.9rem; font-family: inherit;
+  transition: border-color 0.2s;
 }
-input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,92,231,0.15); }
+select { cursor: pointer; }
 table { width: 100%; border-collapse: collapse; }
-th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
-th { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
-tr:hover { background: rgba(99,102,241,0.05); }
-.severity-badge {
-  padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+td { font-size: 0.9rem; }
+tr { transition: background 0.15s; cursor: pointer; }
+tr:hover { background: rgba(108,92,231,0.06); }
+.badge {
+  padding: 3px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; 
+  text-transform: uppercase; letter-spacing: 0.05em; display: inline-block;
 }
-.sev-CRITICAL { background: rgba(239,68,68,0.2); color: var(--danger); }
-.sev-HIGH { background: rgba(249,115,22,0.2); color: var(--high); }
-.sev-MEDIUM { background: rgba(234,179,8,0.2); color: var(--medium); }
-.sev-LOW { background: rgba(34,197,94,0.2); color: var(--low); }
-.sev-INFO { background: rgba(59,130,246,0.2); color: var(--info); }
-.status-running { color: #eab308; }
-.status-completed { color: #22c55e; }
+.badge-CRITICAL, .badge-critical { background: rgba(255,34,34,0.15); color: var(--critical); border: 1px solid rgba(255,34,34,0.3); }
+.badge-HIGH, .badge-high { background: rgba(255,107,53,0.15); color: var(--high); border: 1px solid rgba(255,107,53,0.3); }
+.badge-MEDIUM, .badge-medium { background: rgba(255,215,0,0.15); color: var(--medium); border: 1px solid rgba(255,215,0,0.3); }
+.badge-LOW, .badge-low { background: rgba(0,230,118,0.15); color: var(--low); border: 1px solid rgba(0,230,118,0.3); }
+.badge-INFO, .badge-info { background: rgba(68,138,255,0.15); color: var(--info); border: 1px solid rgba(68,138,255,0.3); }
+.status-completed { color: var(--success); }
+.status-running { color: var(--medium); animation: pulse 1.5s infinite; }
 .status-failed { color: var(--danger); }
+.status-pending { color: var(--muted); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 .hidden { display: none !important; }
-.auth-form { max-width: 400px; margin: 80px auto; }
-.auth-form input { width: 100%; margin-bottom: 12px; }
-.findings-list { max-height: 500px; overflow-y: auto; }
-.finding-item { padding: 12px; border-bottom: 1px solid var(--border); }
-.finding-item:last-child { border-bottom: none; }
-.finding-evidence { 
-  background: var(--bg); padding: 8px 12px; border-radius: 4px; 
-  font-family: monospace; font-size: 0.8rem; margin-top: 8px; white-space: pre-wrap; word-break: break-all;
+.auth-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.auth-card { width: 100%; max-width: 440px; }
+.auth-card h2 { text-align: center; font-size: 1.5rem; margin-bottom: 8px; }
+.auth-card .subtitle { text-align: center; color: var(--muted); margin-bottom: 24px; font-size: 0.9rem; }
+.auth-card input { width: 100%; margin-bottom: 12px; }
+.auth-card .btn { width: 100%; margin-top: 4px; }
+.auth-toggle { text-align: center; margin-top: 16px; color: var(--muted); font-size: 0.85rem; }
+.auth-toggle a { color: var(--accent2); cursor: pointer; text-decoration: none; font-weight: 600; }
+.auth-toggle a:hover { text-decoration: underline; }
+.tabs { display: flex; gap: 0; margin-bottom: 0; }
+.tab { 
+  padding: 12px 24px; cursor: pointer; border: none; background: none; 
+  color: var(--muted); font-weight: 600; font-size: 0.9rem; 
+  border-bottom: 2px solid transparent; transition: all 0.2s; font-family: inherit;
 }
-.tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
-.tab { padding: 8px 20px; cursor: pointer; border: none; background: none; color: var(--muted); font-weight: 600; }
-.tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; text-align: center;
+}
+.stat-value { font-size: 2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+.stat-label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+.findings-list { max-height: 600px; overflow-y: auto; }
+.finding-item { 
+  padding: 16px; border-bottom: 1px solid var(--border); 
+  border-left: 3px solid transparent; transition: all 0.2s;
+}
+.finding-item:nth-child(odd) { background: var(--surface2); }
+.finding-item:hover { border-left-color: var(--accent); }
+.finding-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.finding-title { font-weight: 600; font-size: 0.95rem; }
+.finding-desc { color: var(--muted); font-size: 0.85rem; margin: 6px 0; line-height: 1.5; }
+.finding-evidence { 
+  background: var(--bg); border: 1px solid var(--border); padding: 10px 14px; 
+  border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; 
+  font-size: 0.78rem; margin-top: 8px; white-space: pre-wrap; word-break: break-all;
+  max-height: 150px; overflow-y: auto; color: var(--muted);
+}
+.finding-fix { 
+  margin-top: 8px; color: var(--low); font-size: 0.85rem; 
+  display: flex; align-items: flex-start; gap: 6px;
+}
+.scan-result { margin-top: 16px; padding: 16px; background: var(--surface2); border-radius: var(--radius); border: 1px solid var(--border); }
+.scan-result.success { border-color: var(--success); }
+.code { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent2); background: var(--bg); padding: 2px 6px; border-radius: 3px; }
+.footer { text-align: center; padding: 32px; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 40px; }
+.spinner {
+  display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>🛡️ VulnForge</h1>
-  <div class="user" id="userArea">
-    <span id="userEmail"></span>
-    <button class="btn btn-danger" onclick="logout()" style="display:none" id="logoutBtn">Logout</button>
+<!-- AUTH SECTION -->
+<div id="authSection">
+  <div class="auth-container">
+    <div class="card auth-card" id="authCard">
+      <div class="logo" style="justify-content:center;margin-bottom:16px">
+        <div class="logo-icon">🛡️</div>
+        <div class="logo-text">VulnForge</div>
+      </div>
+      <h2 id="authTitle">Create Account</h2>
+      <p class="subtitle">AI-powered security audits for your applications</p>
+      <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email" />
+      <input type="password" id="loginPassword" placeholder="Password (min 8 characters)" autocomplete="new-password" />
+      <input type="text" id="registerCompany" placeholder="Company name (optional)" />
+      <button class="btn btn-primary" onclick="handleAuth()" id="authBtn">Get Started</button>
+      <div class="auth-toggle">
+        <span id="authToggleText">Already have an account?</span>
+        <a href="#" onclick="toggleAuth()" id="authToggleLink">Sign in</a>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="container">
-  <!-- Auth -->
-  <div id="authSection">
-    <div class="card auth-form" id="loginForm">
-      <h2 id="authTitle">Register</h2>
-      <input type="email" id="loginEmail" placeholder="Email" />
-      <input type="password" id="loginPassword" placeholder="Password" />
-      <input type="text" id="registerCompany" placeholder="Company (optional)" style="display:block" />
-      <button class="btn btn-primary" onclick="handleAuth()" style="width:100%" id="authBtn">Register</button>
-      <p style="text-align:center;margin-top:12px;color:var(--muted);font-size:0.85rem">
-        <a href="#" onclick="toggleAuth()" style="color:var(--accent)" id="authToggle">Already have an account? Login</a>
-      </p>
+<!-- DASHBOARD -->
+<div id="dashboardSection" class="hidden">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🛡️</div>
+      <div class="logo-text">VulnForge</div>
+    </div>
+    <div class="user">
+      <span id="userEmail" style="color:var(--muted)"></span>
+      <button class="btn btn-ghost" onclick="logout()">Logout</button>
     </div>
   </div>
 
-  <!-- Dashboard -->
-  <div id="dashboardSection" class="hidden">
+  <div class="container">
     <div class="tabs">
-      <button class="tab active" onclick="showTab('scans')">Scans</button>
-      <button class="tab" onclick="showTab('newScan')">New Scan</button>
+      <button class="tab active" onclick="showMainTab('scans')">📊 Scans</button>
+      <button class="tab" onclick="showMainTab('newScan')">🔍 New Audit</button>
     </div>
 
     <div id="scansTab">
-      <div class="card">
-        <h2>Your Scans</h2>
-        <div id="scansList">Loading...</div>
+      <div id="scanDetailSection" class="hidden"></div>
+      <div id="scansListContainer">
+        <div class="card" style="margin-top:0;border-top:none;border-radius:0 0 var(--radius) var(--radius)">
+          <h2>Recent Audits</h2>
+          <div id="scansList">No scans yet. Run your first security audit!</div>
+        </div>
       </div>
     </div>
 
     <div id="newScanTab" class="hidden">
       <div class="card">
-        <h2>New Security Audit</h2>
+        <h2>🚀 New Security Audit</h2>
+        <p style="color:var(--muted);margin-bottom:16px;font-size:0.9rem">
+          Our AI agents will scan your target for OWASP Top 10 vulnerabilities, misconfigurations, exposed secrets, and more.
+        </p>
         <div class="input-group">
-          <input type="url" id="targetUrl" placeholder="https://example.com" />
-          <select id="planTier">
-            <option value="bronze">Bronze — 19 CHF</option>
-            <option value="silver" selected>Silver — 99 CHF</option>
-            <option value="gold">Gold — 299 CHF</option>
+          <input type="url" id="targetUrl" placeholder="https://your-app.com" style="flex:2" />
+          <select id="planTier" style="flex:1">
+            <option value="bronze">🥉 Bronze — 19 CHF</option>
+            <option value="silver" selected>🥈 Silver — 99 CHF</option>
+            <option value="gold">🥇 Gold — 299 CHF</option>
           </select>
-          <button class="btn btn-primary" onclick="submitScan()">Scan Now</button>
+          <button class="btn btn-primary" onclick="submitScan()" style="flex:0 0 auto">🔍 Scan Now</button>
         </div>
         <div id="scanResult"></div>
       </div>
     </div>
 
-    <div id="scanDetailSection" class="hidden"></div>
+    <div class="footer">
+      VulnForge &copy; 2026 — AI-Powered Security · All scans require explicit authorization
+    </div>
   </div>
 </div>
 
@@ -145,10 +236,11 @@ let isLogin = false;
 
 function toggleAuth() {
   isLogin = !isLogin;
-  document.getElementById('authTitle').textContent = isLogin ? 'Login' : 'Register';
-  document.getElementById('authBtn').textContent = isLogin ? 'Login' : 'Register';
+  document.getElementById('authTitle').textContent = isLogin ? 'Welcome Back' : 'Create Account';
+  document.getElementById('authBtn').textContent = isLogin ? 'Sign In' : 'Get Started';
   document.getElementById('registerCompany').style.display = isLogin ? 'none' : 'block';
-  document.getElementById('authToggle').textContent = isLogin ? "Don't have an account? Register" : 'Already have an account? Login';
+  document.getElementById('authToggleText').textContent = isLogin ? "Don't have an account?" : 'Already have an account?';
+  document.getElementById('authToggleLink').textContent = isLogin ? 'Create one' : 'Sign in';
 }
 
 async function api(path, opts = {}) {
@@ -156,21 +248,29 @@ async function api(path, opts = {}) {
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${API}${path}`, { ...opts, headers });
   if (res.status === 401) { logout(); throw new Error('Unauthorized'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
   return res.json();
 }
 
-function showTab(tab) {
+function showMainTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('[id$=Tab]').forEach(el => el.classList.add('hidden'));
   event.target.classList.add('active');
+  document.getElementById('scansTab').classList.add('hidden');
+  document.getElementById('newScanTab').classList.add('hidden');
   document.getElementById(tab + 'Tab').classList.remove('hidden');
   document.getElementById('scanDetailSection').classList.add('hidden');
+  document.getElementById('scansListContainer').classList.remove('hidden');
 }
 
 async function handleAuth() {
-  const email = document.getElementById('loginEmail').value;
+  const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
-  const company = document.getElementById('registerCompany').value;
+  const company = document.getElementById('registerCompany').value.trim();
+  if (!email || !password) return alert('Email and password are required.');
+  if (password.length < 8) return alert('Password must be at least 8 characters.');
   try {
     if (isLogin) {
       const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
@@ -182,24 +282,18 @@ async function handleAuth() {
     }
     localStorage.setItem('vf_token', token);
     showDashboard();
-  } catch(e) { 
-    const msg = isLogin ? 'Login failed' : 'Registration failed';
-    alert(msg + ' — check your inputs');
-  }
+  } catch(e) { alert(e.message || 'Authentication failed'); }
 }
 
 function logout() {
-  token = null;
-  localStorage.removeItem('vf_token');
+  token = null; localStorage.removeItem('vf_token');
   document.getElementById('authSection').classList.remove('hidden');
   document.getElementById('dashboardSection').classList.add('hidden');
-  document.getElementById('logoutBtn').style.display = 'none';
 }
 
 async function showDashboard() {
   document.getElementById('authSection').classList.add('hidden');
   document.getElementById('dashboardSection').classList.remove('hidden');
-  document.getElementById('logoutBtn').style.display = 'block';
   try {
     const me = await api('/auth/me');
     document.getElementById('userEmail').textContent = me.email;
@@ -208,61 +302,101 @@ async function showDashboard() {
 }
 
 async function loadScans() {
-  const data = await api('/scans');
-  let html = '<table><thead><tr><th>Target</th><th>Status</th><th>Findings</th><th>Cost</th><th>Date</th></tr></thead><tbody>';
-  for (const s of data) {
-    const statusClass = `status-${s.status}`;
-    html += `<tr style="cursor:pointer" onclick="viewScan('${s.id}')">
-      <td>${s.target_url}</td>
-      <td class="${statusClass}">${s.status}</td>
-      <td>${s.finding_count}</td>
-      <td>${s.cost_estimate ? s.cost_estimate+' CHF' : '-'}</td>
-      <td>${new Date(s.created_at).toLocaleString()}</td>
-    </tr>`;
-  }
-  html += '</tbody></table>';
-  if (data.length === 0) html = '<p style="color:var(--muted)">No scans yet. Submit your first audit!</p>';
-  document.getElementById('scansList').innerHTML = html;
+  try {
+    const data = await api('/scans');
+    if (data.length === 0) {
+      document.getElementById('scansList').innerHTML = 
+        '<p style="color:var(--muted);text-align:center;padding:32px">No scans yet.<br><br><button class="btn btn-primary" onclick="showMainTab(\'newScan\');document.querySelectorAll(\'.tab\')[1].click()">Run Your First Audit 🚀</button></p>';
+      return;
+    }
+    let html = '<table><thead><tr><th>Target</th><th>Status</th><th>Findings</th><th>Tier</th><th>Date</th></tr></thead><tbody>';
+    for (const s of data) {
+      const d = new Date(s.created_at);
+      html += `<tr onclick="viewScan('${s.id}')">
+        <td><strong>${s.target_url.replace('https://','').replace('http://','')}</strong></td>
+        <td><span class="status-${s.status}">${s.status}</span></td>
+        <td><strong>${s.finding_count}</strong></td>
+        <td style="color:var(--muted)">${s.cost_estimate} CHF</td>
+        <td style="color:var(--muted);font-size:0.8rem">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('scansList').innerHTML = html;
+  } catch(e) { document.getElementById('scansList').innerHTML = '<p style="color:var(--danger)">Failed to load scans</p>'; }
 }
 
 async function viewScan(id) {
-  const s = await api(`/scans/${id}`);
-  let html = `<div class="card"><h2>${s.target_url}</h2>
-    <p>Status: <span class="status-${s.status}">${s.status}</span> | Findings: ${s.finding_count} | Cost: ${s.cost_estimate} CHF</p>
-    <button class="btn" onclick="showTab('scans')" style="margin-bottom:12px">← Back</button>
-    <div class="findings-list">`;
-  if (s.findings.length === 0) {
-    html += '<p style="color:var(--muted)">No findings.</p>';
-  }
-  for (const f of s.findings) {
-    html += `<div class="finding-item">
-      <span class="severity-badge sev-${f.severity}">${f.severity}</span>
-      <strong>${f.title}</strong>
-      <p style="margin:4px 0;color:var(--muted);font-size:0.85rem">${f.description}</p>
-      ${f.evidence ? `<div class="finding-evidence">${f.evidence}</div>` : ''}
-      ${f.remediation ? `<p style="margin-top:8px;color:var(--low);font-size:0.85rem">💡 ${f.remediation}</p>` : ''}
-    </div>`;
-  }
-  html += '</div></div>';
-  document.getElementById('scansTab').classList.add('hidden');
-  document.getElementById('newScanTab').classList.add('hidden');
-  document.getElementById('scanDetailSection').innerHTML = html;
-  document.getElementById('scanDetailSection').classList.remove('hidden');
+  try {
+    const s = await api(`/scans/${id}`);
+    const counts = { CRITICAL:0, HIGH:0, MEDIUM:0, LOW:0, INFO:0 };
+    for (const f of s.findings) counts[f.severity] = (counts[f.severity]||0) + 1;
+    
+    let html = `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div>
+          <h2 style="margin-bottom:4px">${s.target_url}</h2>
+          <span style="color:var(--muted);font-size:0.85rem">
+            Status: <span class="status-${s.status}">${s.status}</span> · 
+            ${s.completed_at ? 'Completed ' + new Date(s.completed_at).toLocaleString() : ''}
+          </span>
+        </div>
+        <button class="btn btn-ghost" onclick="showMainTab('scans');document.getElementById('scanDetailSection').classList.add('hidden');document.getElementById('scansListContainer').classList.remove('hidden')">← Back</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card"><div class="stat-value" style="color:var(--critical)">${counts.CRITICAL||0}</div><div class="stat-label">Critical</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:var(--high)">${counts.HIGH||0}</div><div class="stat-label">High</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:var(--medium)">${counts.MEDIUM||0}</div><div class="stat-label">Medium</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:var(--low)">${counts.LOW||0}</div><div class="stat-label">Low</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:var(--info)">${counts.INFO||0}</div><div class="stat-label">Info</div></div>
+      </div>
+
+      <h2 style="margin-top:24px">🔍 Findings (${s.finding_count})</h2>
+      <div class="findings-list">`;
+
+    if (s.findings.length === 0) {
+      html += '<p style="color:var(--success);padding:16px">✅ No vulnerabilities found. Your target appears secure!</p>';
+    }
+
+    for (const f of s.findings) {
+      html += `<div class="finding-item">
+        <div class="finding-header">
+          <span class="badge badge-${f.severity}">${f.severity}</span>
+          <span class="finding-title">${f.title}</span>
+        </div>
+        <div class="finding-desc">${f.description}</div>
+        ${f.evidence ? `<div class="finding-evidence">${f.evidence.slice(0,300)}</div>` : ''}
+        ${f.remediation ? `<div class="finding-fix">💡 ${f.remediation}</div>` : ''}
+      </div>`;
+    }
+
+    html += '</div></div>';
+    document.getElementById('scansListContainer').classList.add('hidden');
+    document.getElementById('scanDetailSection').innerHTML = html;
+    document.getElementById('scanDetailSection').classList.remove('hidden');
+  } catch(e) { alert('Failed to load scan details'); }
 }
 
 async function submitScan() {
-  const target_url = document.getElementById('targetUrl').value;
+  const target_url = document.getElementById('targetUrl').value.trim();
   const plan_tier = document.getElementById('planTier').value;
-  if (!target_url) return alert('Enter a target URL');
-  const scan = await api('/scans', { method: 'POST', body: JSON.stringify({ target_url, plan_tier, scope: 'Full audit' }) });
-  document.getElementById('scanResult').innerHTML = 
-    `<p style="margin-top:12px;color:var(--low)">✅ Scan submitted! ID: <code>${scan.id}</code>. Estimated cost: <strong>${scan.cost_estimate} CHF</strong></p>
-    <p style="color:var(--muted)">Scanning... <button class="btn" onclick="viewScan('${scan.id}')">View progress</button></p>`;
-  setTimeout(loadScans, 3000);
+  if (!target_url) return alert('Please enter a target URL');
+  try {
+    const scan = await api('/scans', { method: 'POST', body: JSON.stringify({ target_url, plan_tier, scope: 'Full security audit' }) });
+    document.getElementById('scanResult').innerHTML = 
+      `<div class="scan-result success">
+        <strong style="color:var(--success)">✅ Audit submitted!</strong><br>
+        Target: <span class="code">${target_url}</span><br>
+        Estimated cost: <strong>${scan.cost_estimate} CHF</strong><br>
+        <span style="color:var(--muted);font-size:0.8rem">Scan ID: ${scan.id}</span><br><br>
+        <button class="btn btn-primary" onclick="viewScan('${scan.id}')">View Live Progress <span class="spinner"></span></button>
+      </div>`;
+    setTimeout(loadScans, 5000);
+  } catch(e) { alert('Failed to submit scan: ' + e.message); }
 }
 
 // Init
-if (token) showDashboard().catch(logout);
+if (token) showDashboard().catch(() => { logout(); });
 </script>
 </body>
 </html>
