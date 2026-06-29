@@ -162,13 +162,24 @@ async def list_scans(
     )
     scans = result.scalars().all()
 
+    # Count findings for each scan
+    scan_ids = [s.id for s in scans]
+    finding_counts = {}
+    if scan_ids:
+        count_result = await db.execute(
+            select(FindingModel.scan_id, func.count(FindingModel.id))
+            .where(FindingModel.scan_id.in_(scan_ids))
+            .group_by(FindingModel.scan_id)
+        )
+        finding_counts = {row[0]: row[1] for row in count_result}
+
     return [
         ScanResponse(
             id=s.id, target_url=s.target_url, status=s.status,
             estimated_tokens=s.estimated_tokens, actual_tokens=s.actual_tokens,
             cost_estimate=s.cost_estimate, created_at=s.created_at,
             started_at=s.started_at, completed_at=s.completed_at,
-            finding_count=0,
+            finding_count=finding_counts.get(s.id, 0),
         ) for s in scans
     ]
 
