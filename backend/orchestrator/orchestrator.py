@@ -16,19 +16,20 @@ from core.database import AsyncSessionLocal
 from models.models import ScanModel, FindingModel, ScanStatus, Severity, ConsentModel
 from core.config import REPORT_DIR
 
-# Import scanner agents (will be created by sub-agent)
+# Import scanner agents
 try:
     from scanners.recon_agent import run_recon
-    from scanners.web_agent import run_web_scan
-    from scanners.config_agent import run_config_scan
-    from scanners.code_agent import run_code_scan
+    from scanners.web_agent import run_web
+    from scanners.config_agent import run_config
+    from scanners.code_agent import run_code
     SCANNERS_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     SCANNERS_AVAILABLE = False
-    async def run_recon(url): return {"findings": [], "metadata": {"error": "Scanner not available"}}
-    async def run_web_scan(url): return {"findings": [], "metadata": {"error": "Scanner not available"}}
-    async def run_config_scan(url): return {"findings": [], "metadata": {"error": "Scanner not available"}}
-    async def run_code_scan(url): return {"findings": [], "metadata": {"error": "Scanner not available"}}
+    print(f"[Orchestrator] Scanner import failed: {e}")
+    async def run_recon(url): return {"findings": [], "metadata": {}}
+    async def run_web(url): return {"findings": [], "metadata": {}}
+    async def run_config(url): return {"findings": [], "metadata": {}}
+    async def run_code(url): return {"findings": [], "metadata": {}}
 
 
 async def run_audit(scan_id: str):
@@ -67,18 +68,18 @@ async def run_audit(scan_id: str):
 
             # Phase 2: Web Application Scan
             print(f"[Orchestrator] Phase 2: Web scan on {scan.target_url}")
-            web_results = await run_web_scan(scan.target_url)
+            web_results = await run_web(scan.target_url)
             all_findings.extend(web_results.get("findings", []))
 
             # Phase 3: Configuration Audit
             print(f"[Orchestrator] Phase 3: Config audit on {scan.target_url}")
-            config_results = await run_config_scan(scan.target_url)
+            config_results = await run_config(scan.target_url)
             all_findings.extend(config_results.get("findings", []))
 
             # Phase 4: Code scan if target is a repo
             if "github.com" in scan.target_url:
                 print(f"[Orchestrator] Phase 4: Code scan on {scan.target_url}")
-                code_results = await run_code_scan(scan.target_url)
+                code_results = await run_code(scan.target_url)
                 all_findings.extend(code_results.get("findings", []))
 
             # Save findings to database
