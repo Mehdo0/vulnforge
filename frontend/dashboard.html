@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VulnForge — Dashboard</title>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #14141f;
+  --border: #1e1e2e;
+  --text: #e0e0f0;
+  --muted: #6c6c8a;
+  --accent: #6366f1;
+  --danger: #ef4444;
+  --high: #f97316;
+  --medium: #eab308;
+  --low: #22c55e;
+  --info: #3b82f6;
+  --radius: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+}
+.header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 16px 32px; display: flex; justify-content: space-between; align-items: center;
+}
+.header h1 { font-size: 1.5rem; background: linear-gradient(135deg, var(--accent), #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header .user { display: flex; align-items: center; gap: 12px; }
+.btn {
+  padding: 8px 16px; border: none; border-radius: var(--radius); cursor: pointer;
+  font-weight: 600; font-size: 0.875rem; transition: all 0.2s;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #5558e6; }
+.btn-danger { background: var(--danger); color: white; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px; }
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; margin-bottom: 16px;
+}
+.card h2 { font-size: 1.1rem; margin-bottom: 16px; }
+.input-group { display: flex; gap: 8px; margin-bottom: 16px; }
+input, select {
+  padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg); color: var(--text); font-size: 0.9rem; flex: 1;
+}
+input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+tr:hover { background: rgba(99,102,241,0.05); }
+.severity-badge {
+  padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+}
+.sev-CRITICAL { background: rgba(239,68,68,0.2); color: var(--danger); }
+.sev-HIGH { background: rgba(249,115,22,0.2); color: var(--high); }
+.sev-MEDIUM { background: rgba(234,179,8,0.2); color: var(--medium); }
+.sev-LOW { background: rgba(34,197,94,0.2); color: var(--low); }
+.sev-INFO { background: rgba(59,130,246,0.2); color: var(--info); }
+.status-running { color: #eab308; }
+.status-completed { color: #22c55e; }
+.status-failed { color: var(--danger); }
+.hidden { display: none !important; }
+.auth-form { max-width: 400px; margin: 80px auto; }
+.auth-form input { width: 100%; margin-bottom: 12px; }
+.findings-list { max-height: 500px; overflow-y: auto; }
+.finding-item { padding: 12px; border-bottom: 1px solid var(--border); }
+.finding-item:last-child { border-bottom: none; }
+.finding-evidence { 
+  background: var(--bg); padding: 8px 12px; border-radius: 4px; 
+  font-family: monospace; font-size: 0.8rem; margin-top: 8px; white-space: pre-wrap; word-break: break-all;
+}
+.tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.tab { padding: 8px 20px; cursor: pointer; border: none; background: none; color: var(--muted); font-weight: 600; }
+.tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🛡️ VulnForge</h1>
+  <div class="user" id="userArea">
+    <span id="userEmail"></span>
+    <button class="btn btn-danger" onclick="logout()" style="display:none" id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Auth -->
+  <div id="authSection">
+    <div class="card auth-form" id="loginForm">
+      <h2>Login</h2>
+      <input type="email" id="loginEmail" placeholder="Email" />
+      <input type="password" id="loginPassword" placeholder="Password" />
+      <button class="btn btn-primary" onclick="login()" style="width:100%">Login</button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboardSection" class="hidden">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('scans')">Scans</button>
+      <button class="tab" onclick="showTab('newScan')">New Scan</button>
+    </div>
+
+    <div id="scansTab">
+      <div class="card">
+        <h2>Your Scans</h2>
+        <div id="scansList">Loading...</div>
+      </div>
+    </div>
+
+    <div id="newScanTab" class="hidden">
+      <div class="card">
+        <h2>New Security Audit</h2>
+        <div class="input-group">
+          <input type="url" id="targetUrl" placeholder="https://example.com" />
+          <select id="planTier">
+            <option value="bronze">Bronze — 19 CHF</option>
+            <option value="silver" selected>Silver — 99 CHF</option>
+            <option value="gold">Gold — 299 CHF</option>
+          </select>
+          <button class="btn btn-primary" onclick="submitScan()">Scan Now</button>
+        </div>
+        <div id="scanResult"></div>
+      </div>
+    </div>
+
+    <div id="scanDetailSection" class="hidden"></div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000/api';
+let token = localStorage.getItem('vf_token');
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...opts.headers };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API}${path}`, { ...opts, headers });
+  if (res.status === 401) { logout(); throw new Error('Unauthorized'); }
+  return res.json();
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('[id$=Tab]').forEach(el => el.classList.add('hidden'));
+  event.target.classList.add('active');
+  document.getElementById(tab + 'Tab').classList.remove('hidden');
+  document.getElementById('scanDetailSection').classList.add('hidden');
+}
+
+async function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  try {
+    const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    token = data.access_token;
+    localStorage.setItem('vf_token', token);
+    showDashboard();
+  } catch(e) { alert('Login failed'); }
+}
+
+function logout() {
+  token = null;
+  localStorage.removeItem('vf_token');
+  document.getElementById('authSection').classList.remove('hidden');
+  document.getElementById('dashboardSection').classList.add('hidden');
+  document.getElementById('logoutBtn').style.display = 'none';
+}
+
+async function showDashboard() {
+  document.getElementById('authSection').classList.add('hidden');
+  document.getElementById('dashboardSection').classList.remove('hidden');
+  document.getElementById('logoutBtn').style.display = 'block';
+  try {
+    const me = await api('/auth/me');
+    document.getElementById('userEmail').textContent = me.email;
+    loadScans();
+  } catch(e) { logout(); }
+}
+
+async function loadScans() {
+  const data = await api('/scans');
+  let html = '<table><thead><tr><th>Target</th><th>Status</th><th>Findings</th><th>Cost</th><th>Date</th></tr></thead><tbody>';
+  for (const s of data) {
+    const statusClass = `status-${s.status}`;
+    html += `<tr style="cursor:pointer" onclick="viewScan('${s.id}')">
+      <td>${s.target_url}</td>
+      <td class="${statusClass}">${s.status}</td>
+      <td>${s.finding_count}</td>
+      <td>${s.cost_estimate ? s.cost_estimate+' CHF' : '-'}</td>
+      <td>${new Date(s.created_at).toLocaleString()}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  if (data.length === 0) html = '<p style="color:var(--muted)">No scans yet. Submit your first audit!</p>';
+  document.getElementById('scansList').innerHTML = html;
+}
+
+async function viewScan(id) {
+  const s = await api(`/scans/${id}`);
+  let html = `<div class="card"><h2>${s.target_url}</h2>
+    <p>Status: <span class="status-${s.status}">${s.status}</span> | Findings: ${s.finding_count} | Cost: ${s.cost_estimate} CHF</p>
+    <button class="btn" onclick="showTab('scans')" style="margin-bottom:12px">← Back</button>
+    <div class="findings-list">`;
+  if (s.findings.length === 0) {
+    html += '<p style="color:var(--muted)">No findings.</p>';
+  }
+  for (const f of s.findings) {
+    html += `<div class="finding-item">
+      <span class="severity-badge sev-${f.severity}">${f.severity}</span>
+      <strong>${f.title}</strong>
+      <p style="margin:4px 0;color:var(--muted);font-size:0.85rem">${f.description}</p>
+      ${f.evidence ? `<div class="finding-evidence">${f.evidence}</div>` : ''}
+      ${f.remediation ? `<p style="margin-top:8px;color:var(--low);font-size:0.85rem">💡 ${f.remediation}</p>` : ''}
+    </div>`;
+  }
+  html += '</div></div>';
+  document.getElementById('scansTab').classList.add('hidden');
+  document.getElementById('newScanTab').classList.add('hidden');
+  document.getElementById('scanDetailSection').innerHTML = html;
+  document.getElementById('scanDetailSection').classList.remove('hidden');
+}
+
+async function submitScan() {
+  const target_url = document.getElementById('targetUrl').value;
+  const plan_tier = document.getElementById('planTier').value;
+  if (!target_url) return alert('Enter a target URL');
+  const scan = await api('/scans', { method: 'POST', body: JSON.stringify({ target_url, plan_tier, scope: 'Full audit' }) });
+  document.getElementById('scanResult').innerHTML = 
+    `<p style="margin-top:12px;color:var(--low)">✅ Scan submitted! ID: <code>${scan.id}</code>. Estimated cost: <strong>${scan.cost_estimate} CHF</strong></p>
+    <p style="color:var(--muted)">Scanning... <button class="btn" onclick="viewScan('${scan.id}')">View progress</button></p>`;
+  setTimeout(loadScans, 3000);
+}
+
+// Init
+if (token) showDashboard().catch(logout);
+</script>
+</body>
+</html>
