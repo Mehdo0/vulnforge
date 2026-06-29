@@ -1,0 +1,114 @@
+# VulnForge Security Audit Report
+
+**Target:** https://test.com?q=' OR '1'='1
+**Date:** 2026-06-29 17:04:29.359380+00:00
+**Scan ID:** bfefaa5e-4d71-49de-83bc-cdb0adf1e53a
+**Unique Findings:** 4
+
+## Executive Summary
+
+This report contains 4 unique security findings identified during an automated audit of https://test.com?q=' OR '1'='1. Findings are grouped by vulnerability type and sorted by severity.
+
+## Severity Breakdown
+
+| Severity | Count |
+|----------|-------|
+| 🟠 HIGH | 1 |
+| 🟡 MEDIUM | 1 |
+| 🟢 LOW | 1 |
+| 🔵 INFO | 1 |
+
+## Detailed Findings
+
+### 1. 🟠 [HIGH] Missing required security header (2 instances found) — 2 occurrences
+
+**Category:** security_headers
+**Source Agent:** web
+
+#### What This Means
+
+Security headers are HTTP response headers that instruct browsers to enable additional security protections. When these headers are missing, your application lacks critical defense-in-depth measures. Each missing header represents a missed opportunity to protect your users: HSTS prevents downgrade attacks, CSP blocks XSS and data injection, X-Frame-Options prevents clickjacking, and X-Content-Type-Options stops MIME sniffing.
+
+This vulnerability was detected at 2 different locations on your application, indicating a systematic issue rather than an isolated instance. The consistency suggests this pattern is likely embedded in your application's architecture or development practices.
+
+#### Evidence
+
+```
+Header 'Strict-Transport-Security' not in response
+
+Header 'Content-Security-Policy' not in response
+```
+
+#### How to Fix
+
+Add the missing security headers to your web server or application configuration. For Nginx/Apache, add them to the server block. For application-level, use middleware. Consider using a service like securityheaders.com to verify your configuration.
+
+---
+
+### 2. 🟡 [MEDIUM] No rate limiting detected
+
+**Category:** rate_limiting
+**Source Agent:** config
+
+#### What This Means
+
+Sent 10 rapid requests without triggering rate limiting (no HTTP 429).
+
+#### Evidence
+
+```
+10 requests completed without rate limiting response
+```
+
+---
+
+### 3. 🟢 [LOW] Missing security header (4 instances found) — 4 occurrences
+
+**Category:** security_headers
+**Source Agent:** web
+
+#### What This Means
+
+Security headers are HTTP response headers that instruct browsers to enable additional security protections. When these headers are missing, your application lacks critical defense-in-depth measures. Each missing header represents a missed opportunity to protect your users: HSTS prevents downgrade attacks, CSP blocks XSS and data injection, X-Frame-Options prevents clickjacking, and X-Content-Type-Options stops MIME sniffing.
+
+This vulnerability was detected at 4 different locations on your application, indicating a systematic issue rather than an isolated instance. The consistency suggests this pattern is likely embedded in your application's architecture or development practices.
+
+#### Evidence
+
+```
+Header 'X-Frame-Options' not found in response
+
+Header 'X-Content-Type-Options' not found in response
+
+Header 'Referrer-Policy' not found in response
+
+Header 'Permissions-Policy' not found in response
+```
+
+#### How to Fix
+
+Add the missing security headers to your web server or application configuration. For Nginx/Apache, add them to the server block. For application-level, use middleware. Consider using a service like securityheaders.com to verify your configuration.
+
+---
+
+### 4. 🔵 [INFO] Subdomains discovered
+
+**Category:** recon
+**Source Agent:** recon
+
+#### What This Means
+
+Found 2 subdomains via DNS enumeration.
+
+#### Evidence
+
+```
+secure.test.com
+www.test.com
+```
+
+---
+
+---
+
+*This report was generated automatically by VulnForge. Findings should be reviewed and verified by a security professional before taking action.*

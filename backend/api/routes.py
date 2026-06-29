@@ -99,6 +99,16 @@ async def create_scan(
     db: AsyncSession = Depends(get_db),
 ):
     """Submit a new security audit."""
+    # Enforce plan tier: user cannot request above their plan
+    tier_order = {"bronze": 1, "silver": 2, "gold": 3}
+    user_tier_level = tier_order.get(current_user.plan_tier.value, 1)
+    requested_tier_level = tier_order.get(payload.plan_tier.value, 1)
+    if requested_tier_level > user_tier_level:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Your {current_user.plan_tier.value} plan cannot request {payload.plan_tier.value} scans. Please upgrade your plan."
+        )
+    
     # Check concurrent scan limit
     active_count = await db.execute(
         select(func.count(ScanModel.id)).where(
